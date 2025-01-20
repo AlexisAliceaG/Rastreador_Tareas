@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+import argparse
 
 data = []
 
@@ -59,3 +60,55 @@ def mark_done(id):
             if row['id'] == id:
                 row['status'] = 'done'
         write(data)
+
+def main():
+    parser = argparse.ArgumentParser(description="Task CLI")
+    subparser = parser.add_subparsers(dest='command')
+    
+    parser_add = subparser.add_parser('add')
+    parser_add.add_argument('description')
+    
+    parser_update = subparser.add_parser('update')
+    parser_update.add_argument('id', type=int)
+    parser_update.add_argument('description')
+    
+    parser_delete = subparser.add_parser('delete')
+    parser_delete.add_argument('id', type=int)
+    
+    parser_in_progress = subparser.add_parser('mark-done')
+    parser_in_progress.add_argument('id', type=int)
+    
+    parser_list = subparser.add_parser('list',)
+    parser_list.add_argument('status', choices=['todo', 'in-progress', 'done'], nargs='?')
+    
+    while True:
+        print("\nAvailable commands:")
+        print("add        - Add a task")
+        print("update     - Update a task")
+        print("delete     - Delete a task")
+        print("mark-done  - Mark a task as completed")
+        print("mark-in-progress  - Mark a task as in progress")
+        print("list       - List tasks")
+        print("exit       - To quit")
+        print("\nEnter a command (or type 'exit' to quit):")
+        user_input = input().strip().split()
+        
+        if user_input[0] == 'exit':
+            break
+        
+        try:
+            args = parser.parse_args(user_input)
+            if args.command == 'add':
+                add(args.description)
+            elif args.command == 'update':
+                update(args.id, args.description)
+            elif args.command == 'delete':
+                delete(args.id)
+            elif args.command == 'mark-done':
+                mark_done(args.id)
+            elif args.command == 'list':
+                list(args.status)
+        except SystemExit as e:
+            continue
+
+main()
